@@ -39,10 +39,11 @@
             flex: 1;
             padding: 8px;
             border: none;
-            font-size: 16px;
+            font-size: 16px;  /* Minimum 16px to prevent zoom on iOS */
             outline: none;
             margin-left: 8px;
         }
+
         .search-icon {
             color: #4285f4;
             font-size: 20px;
@@ -235,13 +236,9 @@
         markersMap[loc.name] = marker;
     });
 
-    // Search function
     function searchLocations(query) {
         const searchResults = document.getElementById('searchResults');
         const resultsContainer = document.querySelector('.search-results');
-        
-        // Close all existing popups
-        Object.values(markersMap).forEach(marker => marker.closePopup());
         
         if (!query) {
             resultsContainer.style.display = 'none';
@@ -255,13 +252,12 @@
         if (filteredLocations.length === 0) {
             searchResults.innerHTML = '<div class="search-result-item"><i class="fas fa-times-circle result-icon"></i>No results found</div>';
         } else {
-            // Show popup for the first match
+            // Only show popup without moving the map
             if (filteredLocations.length > 0) {
                 const firstMatch = filteredLocations[0];
                 const marker = markersMap[firstMatch.name];
                 if (marker) {
                     marker.openPopup();
-                    map.setView([firstMatch.lat, firstMatch.lon], 19);
                 }
             }
 
@@ -278,10 +274,14 @@
         resultsContainer.style.display = 'block';
     }
 
-    // Center map on selected location
+    // Modified centerOnLocation to handle the map movement
     function centerOnLocation(locationName) {
         const location = locations.find(loc => loc.name === locationName);
         if (location) {
+            // Close all existing popups first
+            Object.values(markersMap).forEach(marker => marker.closePopup());
+            
+            // Center map and show popup
             map.setView([location.lat, location.lon], 19);
             const marker = markersMap[locationName];
             if (marker) {
@@ -290,6 +290,9 @@
         }
         document.querySelector('.search-results').style.display = 'none';
         document.querySelector('.search-box').value = locationName;
+        
+        // Remove focus from search box to hide mobile keyboard
+        document.querySelector('.search-box').blur();
     }
 
     // User location tracking variables and functions
