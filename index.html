@@ -24,12 +24,17 @@
             top: 0;
             left: 0;
         }
+        /* Move zoom controls to the right side */
+        .leaflet-top.leaflet-left {
+            right: 20px !important;
+            left: auto !important;
+        }
         .search-container {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1000;
+            z-index: 999; /* Adjusted z-index */
             width: 400px;
             background: white;
             border-radius: 24px;
@@ -56,7 +61,6 @@
             -webkit-touch-callout: none;
         }
 
-        /* Updated mobile styles */
         @media (max-width: 768px) {
             .search-container {
                 width: 80%;
@@ -97,7 +101,6 @@
             font-weight: bold;
             margin-left: 12px;
         }
-        /* Rest of the styles remain the same */
         .search-results {
             position: absolute;
             top: 100%;
@@ -194,9 +197,18 @@
     const centerLat = 17.61717;
     const centerLon = 121.72326;
 
-    // Initialize map
-    const map = L.map('map').setView([centerLat, centerLon], 18);
+    // Initialize map with zoom controls on the right
+    const map = L.map('map', {
+        zoomControl: true,
+        zoomControlOptions: {
+            position: 'topright'
+        }
+    }).setView([centerLat, centerLon], 18);
 
+    // Move zoom control to the right
+    map.zoomControl.setPosition('topright');
+
+    // Rest of the JavaScript code remains exactly the same
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -290,7 +302,6 @@
         if (filteredLocations.length === 0) {
             searchResults.innerHTML = '<div class="search-result-item"><i class="fas fa-times-circle result-icon"></i>No results found</div>';
         } else {
-            // Only show popup without moving the map
             if (filteredLocations.length > 0) {
                 const firstMatch = filteredLocations[0];
                 const marker = markersMap[firstMatch.name];
@@ -298,6 +309,8 @@
                     marker.openPopup();
                 }
             }
+
+            <!-- Previous HTML and CSS code remains exactly the same until the searchLocations function -->
 
             searchResults.innerHTML = filteredLocations
                 .map(loc => `
@@ -307,68 +320,67 @@
                     </div>
                 `)
                 .join('');
-        }
+            }
 
-        resultsContainer.style.display = 'block';
-    }
+            resultsContainer.style.display = 'block';
+            }
 
-    // Modified centerOnLocation to handle the map movement
-    function centerOnLocation(locationName) {
-        const location = locations.find(loc => loc.name === locationName);
-        if (location) {
+            function centerOnLocation(locationName) {
+            const location = locations.find(loc => loc.name === locationName);
+            if (location) {
             // Close all existing popups first
             Object.values(markersMap).forEach(marker => marker.closePopup());
-            
+
             // Center map and show popup
             map.setView([location.lat, location.lon], 19);
             const marker = markersMap[locationName];
             if (marker) {
                 marker.openPopup();
             }
-        }
-        document.querySelector('.search-results').style.display = 'none';
-        document.querySelector('.search-box').value = locationName;
-        
-        // Remove focus from search box to hide mobile keyboard
-        document.querySelector('.search-box').blur();
-    }
+            }
+            document.querySelector('.search-results').style.display = 'none';
+            document.querySelector('.search-box').value = locationName;
 
-    // User location tracking variables and functions
-    let userMarkers = [];
-    let watchId = null;
+            // Remove focus from search box to hide mobile keyboard
+            document.querySelector('.search-box').blur();
+            }
 
-    // Create location dot on map
-    function createLocationDot(lat, lon) {
-        userMarkers.forEach(marker => map.removeLayer(marker));
-        userMarkers = [];
-        
-        const mainDot = L.circle([lat, lon], {
+            // User location tracking variables and functions
+            let userMarkers = [];
+            let watchId = null;
+
+            // Create location dot on map
+            function createLocationDot(lat, lon) {
+            userMarkers.forEach(marker => map.removeLayer(marker));
+            userMarkers = [];
+
+            const mainDot = L.circle([lat, lon], {
             color: '#4285f4',
             fillColor: '#4285f4',
             fillOpacity: 0.9,
             radius: 3,
             weight: 0
-        });
-        
-        const outerGlow = L.circle([lat, lon], {
+            });
+
+            const outerGlow = L.circle([lat, lon], {
             color: '#4285f4',
             fillColor: '#4285f4',
             fillOpacity: 0.15,
             radius: 8,
             weight: 0
-        });
+            });
 
-        mainDot.addTo(map);
-        outerGlow.addTo(map);
-        userMarkers.push(mainDot, outerGlow);
-    }
+            mainDot.addTo(map);
+            outerGlow.addTo(map);
+            userMarkers.push(mainDot, outerGlow);
+            }
 
-    // Toggle location tracking
-    function toggleTracking() {
-        const trackButton = document.getElementById('trackButton');
-        const statusElement = document.getElementById('status');
+            // Toggle location tracking
+            function toggleTracking() {
+            const trackButton = document.getElementById('trackButton');
+            const statusElement = document.getElementById('status');
 
-        if (navigator.geolocation) {
+            if (navigator.geolocation) {
             if (watchId === null) {
                 trackButton.classList.add('active');
                 statusElement.style.display = 'block';
@@ -398,21 +410,21 @@
                 trackButton.classList.remove('active');
                 statusElement.style.display = 'none';
             }
-        } else {
+            } else {
             statusElement.innerHTML = 'Geolocation is not supported by this browser.';
             statusElement.style.display = 'block';
             setTimeout(() => {
                 statusElement.style.display = 'none';
             }, 3000);
-        }
-    }
+            }
+            }
 
-    // Close search results when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-container')) {
+            // Close search results when clicking outside
+            document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
             document.querySelector('.search-results').style.display = 'none';
-        }
-    });
-    </script>
+            }
+            });
+            </script>
 </body>
 </html>
