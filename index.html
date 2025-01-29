@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>Paula-Sisstant SPUP Campus Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -36,13 +39,37 @@
             padding: 8px 16px;
         }
         .search-box {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            font-size: 16px;  /* Minimum 16px to prevent zoom on iOS */
-            outline: none;
-            margin-left: 8px;
+        flex: 1;
+        padding: 12px; /* Slightly larger padding */
+        border: none;
+        font-size: 16px; /* iOS requires minimum 16px to prevent zoom */
+        outline: none;
+        margin-left: 8px;
+        -webkit-appearance: none; /* Prevents iOS styling */
+        border-radius: 0; /* Prevents iOS styling */
+        transform: scale(1); /* Forces GPU rendering */
+        touch-action: manipulation; /* Better touch handling */
+    }
+
+    /* Add these rules to prevent touch highlighting */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+
+    /* Make the search container slightly larger on mobile */
+    @media (max-width: 768px) {
+        .search-container {
+            width: 90%;
+            max-width: 400px;
         }
+        
+        .search-box {
+            font-size: 16px;
+            line-height: 1.3;
+            padding: 12px 8px;
+        }
+    }
 
         .search-icon {
             color: #4285f4;
