@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
+        /* Base styles */
         html, body {
             margin: 0;
             padding: 0;
@@ -17,11 +18,56 @@
             overflow: hidden;
             font-family: Roboto, Arial, sans-serif;
         }
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #003810; /* Darker blue color */
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .system-name {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Remove the overlay since we're using a solid background now */
+        /* Adjust the map container to account for the navbar */
         #map { 
-            height: 100vh;
+            height: calc(100vh - 56px);
             width: 100vw;
             position: absolute;
-            top: 0;
+            top: 56px;
             left: 0;
         }
         /* Move zoom controls to the right side */
@@ -29,12 +75,14 @@
             right: 20px !important;
             left: auto !important;
         }
+
+        /* Search Container */
         .search-container {
             position: fixed;
-            top: 20px;
+            top: 76px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 999; /* Adjusted z-index */
+            z-index: 999;
             width: 400px;
             background: white;
             border-radius: 24px;
@@ -43,6 +91,7 @@
             align-items: center;
             padding: 8px 16px;
         }
+
         .search-box {
             flex: 1;
             padding: 12px;
@@ -56,50 +105,53 @@
             touch-action: manipulation;
         }
 
+        /* Disable tap highlight on mobile */
         * {
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
         }
 
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .search-container {
-                width: 70%; /* Reduced from 80% */
-                max-width: 250px; /* Reduced from 300px */
-                padding: 2px 8px; /* Reduced padding */
-                top: 8px; /* Moved up slightly */
-                height: 36px; /* Added fixed height */
+                width: 70%;
+                max-width: 250px;
+                padding: 2px 8px;
+                top: 64px;
+                height: 36px;
             }
             
             .search-box {
-                font-size: 13px; /* Reduced from 14px */
-                padding: 4px 2px; /* Reduced padding */
-                height: 24px; /* Added fixed height */
+                font-size: 13px;
+                padding: 4px 2px;
+                height: 24px;
             }
 
             .search-icon {
-                font-size: 14px !important; /* Reduced from 16px */
+                font-size: 14px !important;
             }
 
             .paula-icon {
-                width: 20px !important; /* Reduced from 24px */
-                height: 20px !important; /* Reduced from 24px */
-                font-size: 10px !important; /* Reduced from 12px */
-                margin-left: 8px !important; /* Reduced margin */
+                width: 20px !important;
+                height: 20px !important;
+                font-size: 10px !important;
+                margin-left: 8px !important;
             }
 
             .search-result-item {
-                padding: 8px 12px; /* Reduced padding */
-                font-size: 13px; /* Reduced font size */
+                padding: 8px 12px;
+                font-size: 13px;
             }
-        
         }
 
+        /* Search Elements */
         .search-icon {
-            color: #4285f4;
+            color: #003810;
             font-size: 20px;
         }
+
         .paula-icon {
-            background: #4285f4;
+            background: #003810;
             color: white;
             width: 32px;
             height: 32px;
@@ -110,6 +162,8 @@
             font-weight: bold;
             margin-left: 12px;
         }
+
+        /* Search Results */
         .search-results {
             position: absolute;
             top: 100%;
@@ -123,19 +177,24 @@
             overflow-y: auto;
             display: none;
         }
+
         .search-result-item {
             padding: 12px 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
         }
+
         .search-result-item:hover {
             background-color: #f5f5f5;
         }
+
         .result-icon {
-            color: #4285f4;
+            color: #003810;
             margin-right: 12px;
         }
+
+        /* Tracking Button */
         .tracking-button {
             position: fixed;
             bottom: 20px;
@@ -155,12 +214,16 @@
             align-items: center;
             justify-content: center;
         }
+
         .tracking-button:hover {
             background-color: #357abd;
         }
+
         .tracking-button.active {
             background-color: #ea4335;
         }
+
+        /* Status Display */
         #status {
             position: fixed;
             bottom: 80px;
@@ -172,6 +235,8 @@
             display: none;
             font-size: 14px;
         }
+
+        /* Map Markers */
         .building-icon {
             background: #ea4335;
             border: 2px solid white;
@@ -180,28 +245,331 @@
             height: 12px !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+
+        /* Popup Styling */
         .leaflet-popup-content {
             margin: 10px;
             text-align: center;
             font-weight: 500;
             font-family: Roboto, Arial, sans-serif;
         }
+
+        /* Requirements Container */
+        #requirements {
+            display: none;
+            padding: 20px;
+            margin-top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        /* Content Container */
+        #map-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
-    <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" class="search-box" placeholder="Search Paula-Sisstant" oninput="searchLocations(this.value)">
-        <div class="paula-icon">P</div>
-        <div class="search-results" id="searchResults"></div>
-    </div>
-    <div id="map"></div>
-    <button onclick="toggleTracking()" class="tracking-button" id="trackButton">
-        <i class="fas fa-location-crosshairs"></i>
-    </button>
-    <div id="status"></div>
+    <nav class="nav-bar">
+        <a href="#" class="system-name">Paula-Sisstant</a>
+        <div class="nav-links">
+            <a href="#" class="nav-item active" onclick="showMap(event)">Map</a>
+            <a href="#" class="nav-item" onclick="showRequirements(event)">Enrollment</a>
+        </div>
+    </nav>
 
-    <script>
+    <div id="map-container">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-box" placeholder="Search Paula-Sisstant" oninput="searchLocations(this.value)">
+            <div class="paula-icon">P</div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        <div id="map"></div>
+        <button onclick="toggleTracking()" class="tracking-button" id="trackButton">
+            <i class="fas fa-location-crosshairs"></i>
+        </button>
+        <div id="status"></div>
+    </div>
+
+    <div id="requirements">
+        <style>
+            /* Requirements Section Styles */
+            .requirements-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+    
+            .requirements-title {
+                color: #003810;
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+    
+            .tab-container {
+                display: flex;
+                justify-content: center;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+    
+            .tab-button {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+                background: #e8eaf6;
+                transition: all 0.3s ease;
+            }
+    
+            .tab-button.active {
+                background: #003810;
+                color: white;
+            }
+    
+            .section-card {
+                background: white;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+    
+            .section-header {
+                background: #003810;
+                color: white;
+                padding: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+            }
+    
+            .section-content {
+                padding: 1rem;
+                display: none;
+            }
+    
+            .section-content.active {
+                display: block;
+            }
+    
+            .section-title {
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin: 0;
+            }
+    
+            .subsection {
+                margin-bottom: 1.5rem;
+            }
+    
+            .subsection-title {
+                color: #003810;
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+                font-weight: bold;
+            }
+    
+            .requirements-list {
+                list-style-type: disc;
+                padding-left: 2rem;
+                margin-bottom: 1rem;
+            }
+    
+            .requirements-list li {
+                margin-bottom: 0.5rem;
+            }
+    
+            .contact-card {
+                background: #003810;
+                color: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                margin-top: 2rem;
+            }
+    
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .requirements-container {
+                    padding: 10px;
+                }
+    
+                .tab-container {
+                    flex-wrap: wrap;
+                }
+    
+                .tab-button {
+                    width: calc(50% - 0.5rem);
+                    font-size: 0.9rem;
+                }
+    
+                .section-title {
+                    font-size: 1.1rem;
+                }
+            }
+        </style>
+    
+        <div class="requirements-container">
+            <h1 class="requirements-title">Requirements for Enrollment</h1>
+    
+            <div class="tab-container">
+                <button class="tab-button active" data-tab="all">All Requirements</button>
+                <button class="tab-button" data-tab="basic">Basic Education</button>
+                <button class="tab-button" data-tab="college">College</button>
+            </div>
+    
+            <!-- Basic Education Section -->
+            <div class="section-card" data-section="basic">
+                <div class="section-header">
+                    <h2 class="section-title">Basic Education Unit</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">Grade School & Junior High School</h3>
+                        <h4>New Pupils/Students and Transferees:</h4>
+                        <ul class="requirements-list">
+                            <li>Photocopy of Birth Certificate</li>
+                            <li>Photocopy of Baptismal Certificate</li>
+                            <li>Two pieces of 2×2 ID Picture</li>
+                            <li>Form 138-A (Report Card)</li>
+                        </ul>
+                    </div>
+    
+                    <div class="subsection">
+                        <h4>Additional Requirement for Transferees:</h4>
+                        <ul class="requirements-list">
+                            <li>Good Moral Certificate or letter of recommendation from the principal/guidance counselor/class adviser from the school last attended</li>
+                        </ul>
+                    </div>
+    
+                    <div class="subsection">
+                        <h3 class="subsection-title">Senior High School</h3>
+                        <ul class="requirements-list">
+                            <li>Form 138-A (Report Card)</li>
+                            <li>NCAE Result</li>
+                            <li>Certificate of Good Moral</li>
+                            <li>Photocopy of PSA/NSO Birth Certificate</li>
+                            <li>QVR Certificate/ESC ID Number</li>
+                            <li>Two pieces of 2×2 ID Picture</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- College Section -->
+            <div class="section-card" data-section="college">
+                <div class="section-header">
+                    <h2 class="section-title">College</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="subsection">
+                        <h3 class="subsection-title">For Incoming First Year College Students:</h3>
+                        <ul class="requirements-list">
+                            <li>Form 138-A (High School Report Card)</li>
+                            <li>Certificate of Good Moral Character</li>
+                            <li>Police Clearance/Barangay Clearance</li>
+                            <li>Photocopy of NSO Birth Certificate</li>
+                            <li>Two copies of recent 2×2 ID picture</li>
+                            <li>Placement Test Result from SPUP Guidance Center</li>
+                        </ul>
+                    </div>
+    
+                    <div class="subsection">
+                        <h3 class="subsection-title">For Transferees:</h3>
+                        <ul class="requirements-list">
+                            <li>Transcript of Records from previous school (for evaluation)</li>
+                            <li>Honorable Dismissal</li>
+                            <li>Certificate of Good Moral Character from previous school</li>
+                            <li>Result of Interview from the concerned receiving Dean</li>
+                            <li>Photocopy of NSO Birth Certificate</li>
+                            <li>Psychological / Physical Fitness Certification (as the case maybe)</li>
+                        </ul>
+                    </div>
+    
+                    <div class="subsection">
+                        <h3 class="subsection-title">For Scholars and Married Students:</h3>
+                        <ul class="requirements-list">
+                            <li>Certificate of eligibility / Grant for students enjoying private and government extended education benefits</li>
+                            <li>Marriage contract administered in the Church for married students</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Contact Information -->
+            <div class="contact-card">
+                <h2 class="section-title">Contact Information</h2>
+                <div style="margin-top: 1rem;">
+                    <p>DR. ALLAN PEEJAY M. LAPPAY</p>
+                    <p>Director, University Admissions and Enrollment</p>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            // Toggle sections
+            document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.toggle-icon');
+                    content.classList.toggle('active');
+                    icon.textContent = content.classList.contains('active') ? '▲' : '▼';
+                });
+            });
+    
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active tab
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+    
+                    const tab = button.dataset.tab;
+                    const sections = document.querySelectorAll('.section-card');
+    
+                    if (tab === 'all') {
+                        sections.forEach(section => section.style.display = 'block');
+                    } else {
+                        sections.forEach(section => {
+                            if (section.dataset.section === tab) {
+                                section.style.display = 'block';
+                            } else {
+                                section.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+    </div>
+
+    <script>        
+    
+    function showMap(event) {
+        event.preventDefault();
+        document.getElementById('map-container').style.display = 'block';
+        document.getElementById('requirements').style.display = 'none';
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function showRequirements(event) {
+        event.preventDefault();
+        document.getElementById('map-container').style.display = 'none';
+        document.getElementById('requirements').style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
     // Initial map center coordinates
     const centerLat = 17.61717;
     const centerLon = 121.72326;
