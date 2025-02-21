@@ -555,253 +555,318 @@
     <script>        
     
     function showMap(event) {
-        event.preventDefault();
-        document.getElementById('map-container').style.display = 'block';
-        document.getElementById('requirements').style.display = 'none';
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        event.target.classList.add('active');
+    event.preventDefault();
+    document.getElementById('map-container').style.display = 'block';
+    document.getElementById('requirements').style.display = 'none';
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function showRequirements(event) {
+    event.preventDefault();
+    document.getElementById('map-container').style.display = 'none';
+    document.getElementById('requirements').style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Initial map center coordinates
+const centerLat = 17.61717;
+const centerLon = 121.72326;
+
+// Initialize map with zoom controls on the right
+const map = L.map('map', {
+    zoomControl: true,
+    zoomControlOptions: {
+        position: 'topright'
+    }
+}).setView([centerLat, centerLon], 18);
+
+// Move zoom control to the right
+map.zoomControl.setPosition('topright');
+
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Create custom icon
+const buildingIcon = L.divIcon({
+    className: 'building-icon',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+    popupAnchor: [0, -6]
+});
+
+// Building locations data
+const locations = [
+    { lat: 17.61740568877304, lon: 121.72502322421214, name: "LevesVille Training Center" },
+    { lat: 17.61686937661038, lon: 121.72489975345104, name: "Vehicle Gate" },
+    { lat: 17.616900243540663, lon: 121.72434919530312, name: "Our Lady of Chartres-Chapel" },
+    { lat: 17.617000561022625, lon: 121.72397068655039, name: "Our Lady of Chartres Building" },
+    { lat: 17.61720263263038, lon: 121.72300812118002, name: "Clasp Office" },
+    { lat: 17.61637515989585, lon: 121.72372673455426, name: "St. Joseph Building" },
+    { lat: 17.618037289956867, lon: 121.7238346272093, name: "BEU Extension" },
+    { lat: 17.618231382334326, lon: 121.72258821272214, name: "Grandstand" },
+    { lat: 17.616373781682146, lon: 121.72298813069362, name: "St. Therese Dormitory" },
+    { lat: 17.61619169426505, lon: 121.72300723535383, name: "St. Claire Dormitory" },
+    { lat: 17.61625997706798, lon: 121.72336067156795, name: "St. Francis Dormitory" },
+    { lat: 17.61639199041374, lon: 121.72275409860588, name: "SPC Garage" },
+    { lat: 17.616546764558176, lon: 121.72257260433379, name: "SPS Community" },
+    { lat: 17.617169514071932, lon: 121.72205731972672, name: "Eco Center" },
+    { lat: 17.617423519052263, lon: 121.72203336429315, name: "Warehouse" },
+    { lat: 17.617083894329465, lon: 121.72248252867035, name: "Power House" },
+    { lat: 17.616146248475683, lon: 121.72256137250274, name: "SPS Guard House" },
+    { lat: 17.616312295759418, lon: 121.72261944490275, name: "Aviary" },
+    { lat: 17.616180841672396, lon: 121.72246337532772, name: "Cistern Tank" },
+    { lat: 17.617654505693242, lon: 121.72207501615266, name: "International CR" },
+    { lat: 17.617848225894686, lon: 121.7219044284739, name: "Back Gate" },
+    { lat: 17.618242421760907, lon: 121.72179236369558, name: "Toxic Vault" },
+    { lat: 17.618040253955318, lon: 121.72216252897783, name: "Basketball Court" },
+    { lat: 17.618116772098915, lon: 121.72272004367899, name: "Parking Area" },
+    { lat: 17.617808325574995, lon: 121.72271242895133, name: "SPUP Field" },
+    { lat: 17.618080484299945, lon: 121.72315408315626, name: "Lagoon" },
+    { lat: 17.618007908680102, lon: 121.72343582808008, name: "Swimming Pool" },
+    { lat: 17.618138544774794, lon: 121.7236909214571, name: "Pavilio" },
+    { lat: 17.61838893036911, lon: 121.7236300036469, name: "Swimming pool Locker Room" },
+    { lat: 17.61836352895244, lon: 121.72403358424106, name: "Butterfly Garden" },
+    { lat: 17.61784824222775, lon: 121.72427725552653, name: "Main Canteen" },
+    { lat: 17.617478105784894, lon: 121.72316931265036, name: "Pino Adobo Satellite Canteen" },
+    { lat: 17.61633481369869, lon: 121.72421571768807, name: "Boutique/ Nihon Satellite Canteen" },
+    { lat: 17.61730370261142, lon: 121.72326062049284, name: "NSTP Park" },
+    { lat: 17.61667730525768, lon: 121.72477837395651, name: "Plaza Martinez" },
+    { lat: 17.61660069536014, lon: 121.72452777914786, name: "Groto" },
+    { lat: 17.618101342137198, lon: 121.72464598424628, name: "Saint Paul University Gym" },
+    { lat: 17.61765069877067, lon: 121.72438120482582, name: "High School Department" },
+    { lat: 17.617803917641577, lon: 121.72364833321566, name: "Grade School Department" },
+    { lat: 17.617087392979688, lon: 121.72378072292587, name: "Student Center" },
+    { lat: 17.616698102214766, lon: 121.72353184413186, name: "Lorenzo Ruiz Building" },
+    { lat: 17.617254023782436, lon: 121.72256071861152, name: "Learning Resource Center" },
+    { lat: 17.617601574517792, lon: 121.72253519521352, name: "Mere Maria Building" },
+    { lat: 17.616329647729593, lon: 121.72459125749481, name: "Father Louis Chauvet" }
+];
+
+// Store markers in an object for easy access
+const markersMap = {};
+
+// Add markers for all locations and store them
+locations.forEach(loc => {
+    const marker = L.marker([loc.lat, loc.lon], {
+        icon: buildingIcon
+    })
+    .bindPopup(loc.name, {
+        closeButton: false
+    })
+    .addTo(map);
+    
+    markersMap[loc.name] = marker;
+});
+
+function searchLocations(query) {
+    const searchResults = document.getElementById('searchResults');
+    const resultsContainer = document.querySelector('.search-results');
+    
+    if (!query) {
+        resultsContainer.style.display = 'none';
+        return;
     }
 
-    function showRequirements(event) {
-        event.preventDefault();
-        document.getElementById('map-container').style.display = 'none';
-        document.getElementById('requirements').style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        event.target.classList.add('active');
-    }
+    const filteredLocations = locations.filter(loc => 
+        loc.name.toLowerCase().includes(query.toLowerCase())
+    );
 
-    // Initial map center coordinates
-    const centerLat = 17.61717;
-    const centerLon = 121.72326;
-
-    // Initialize map with zoom controls on the right
-    const map = L.map('map', {
-        zoomControl: true,
-        zoomControlOptions: {
-            position: 'topright'
-        }
-    }).setView([centerLat, centerLon], 18);
-
-    // Move zoom control to the right
-    map.zoomControl.setPosition('topright');
-
-    // Rest of the JavaScript code remains exactly the same
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Create custom icon
-    const buildingIcon = L.divIcon({
-        className: 'building-icon',
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
-        popupAnchor: [0, -6]
-    });
-
-    // Building locations data
-    const locations = [
-        { lat: 17.61740568877304, lon: 121.72502322421214, name: "LevesVille Training Center" },
-        { lat: 17.61686937661038, lon: 121.72489975345104, name: "Vehicle Gate" },
-        { lat: 17.616900243540663, lon: 121.72434919530312, name: "Our Lady of Chartres-Chapel" },
-        { lat: 17.617000561022625, lon: 121.72397068655039, name: "Our Lady of Chartres Building" },
-        { lat: 17.61720263263038, lon: 121.72300812118002, name: "Clasp Office" },
-        { lat: 17.61637515989585, lon: 121.72372673455426, name: "St. Joseph Building" },
-        { lat: 17.618037289956867, lon: 121.7238346272093, name: "BEU Extension" },
-        { lat: 17.618231382334326, lon: 121.72258821272214, name: "Grandstand" },
-        { lat: 17.616373781682146, lon: 121.72298813069362, name: "St. Therese Dormitory" },
-        { lat: 17.61619169426505, lon: 121.72300723535383, name: "St. Claire Dormitory" },
-        { lat: 17.61625997706798, lon: 121.72336067156795, name: "St. Francis Dormitory" },
-        { lat: 17.61639199041374, lon: 121.72275409860588, name: "SPC Garage" },
-        { lat: 17.616546764558176, lon: 121.72257260433379, name: "SPS Community" },
-        { lat: 17.617169514071932, lon: 121.72205731972672, name: "Eco Center" },
-        { lat: 17.617423519052263, lon: 121.72203336429315, name: "Warehouse" },
-        { lat: 17.617083894329465, lon: 121.72248252867035, name: "Power House" },
-        { lat: 17.616146248475683, lon: 121.72256137250274, name: "SPS Guard House" },
-        { lat: 17.616312295759418, lon: 121.72261944490275, name: "Aviary" },
-        { lat: 17.616180841672396, lon: 121.72246337532772, name: "Cistern Tank" },
-        { lat: 17.617654505693242, lon: 121.72207501615266, name: "International CR" },
-        { lat: 17.617848225894686, lon: 121.7219044284739, name: "Back Gate" },
-        { lat: 17.618242421760907, lon: 121.72179236369558, name: "Toxic Vault" },
-        { lat: 17.618040253955318, lon: 121.72216252897783, name: "Basketball Court" },
-        { lat: 17.618116772098915, lon: 121.72272004367899, name: "Parking Area" },
-        { lat: 17.617808325574995, lon: 121.72271242895133, name: "SPUP Field" },
-        { lat: 17.618080484299945, lon: 121.72315408315626, name: "Lagoon" },
-        { lat: 17.618007908680102, lon: 121.72343582808008, name: "Swimming Pool" },
-        { lat: 17.618138544774794, lon: 121.7236909214571, name: "Pavilio" },
-        { lat: 17.61838893036911, lon: 121.7236300036469, name: "Swimming pool Locker Room" },
-        { lat: 17.61836352895244, lon: 121.72403358424106, name: "Butterfly Garden" },
-        { lat: 17.61784824222775, lon: 121.72427725552653, name: "Main Canteen" },
-        { lat: 17.617478105784894, lon: 121.72316931265036, name: "Pino Adobo Satellite Canteen" },
-        { lat: 17.61633481369869, lon: 121.72421571768807, name: "Boutique/ Nihon Satellite Canteen" },
-        { lat: 17.61730370261142, lon: 121.72326062049284, name: "NSTP Park" },
-        { lat: 17.61667730525768, lon: 121.72477837395651, name: "Plaza Martinez" },
-        { lat: 17.61660069536014, lon: 121.72452777914786, name: "Groto" },
-        { lat: 17.618101342137198, lon: 121.72464598424628, name: "Saint Paul University Gym" },
-        { lat: 17.61765069877067, lon: 121.72438120482582, name: "High School Department" },
-        { lat: 17.617803917641577, lon: 121.72364833321566, name: "Grade School Department" },
-        { lat: 17.617087392979688, lon: 121.72378072292587, name: "Student Center" },
-        { lat: 17.616698102214766, lon: 121.72353184413186, name: "Lorenzo Ruiz Building" },
-        { lat: 17.617254023782436, lon: 121.72256071861152, name: "Learning Resource Center" },
-        { lat: 17.617601574517792, lon: 121.72253519521352, name: "Mere Maria Building" },
-        { lat: 17.616329647729593, lon: 121.72459125749481, name: "Father Louis Chauvet" }
-    ];
-
-    // Store markers in an object for easy access
-    const markersMap = {};
-
-    // Add markers for all locations and store them
-    locations.forEach(loc => {
-        const marker = L.marker([loc.lat, loc.lon], {
-            icon: buildingIcon
-        })
-        .bindPopup(loc.name, {
-            closeButton: false
-        })
-        .addTo(map);
-        
-        markersMap[loc.name] = marker;
-    });
-
-    function searchLocations(query) {
-        const searchResults = document.getElementById('searchResults');
-        const resultsContainer = document.querySelector('.search-results');
-        
-        if (!query) {
-            resultsContainer.style.display = 'none';
-            return;
-        }
-
-        const filteredLocations = locations.filter(loc => 
-            loc.name.toLowerCase().includes(query.toLowerCase())
-        );
-
-        if (filteredLocations.length === 0) {
-            searchResults.innerHTML = '<div class="search-result-item"><i class="fas fa-times-circle result-icon"></i>No results found</div>';
-        } else {
-            if (filteredLocations.length > 0) {
-                const firstMatch = filteredLocations[0];
-                const marker = markersMap[firstMatch.name];
-                if (marker) {
-                    marker.openPopup();
-                }
-            }
-
-            <!-- Previous HTML and CSS code remains exactly the same until the searchLocations function -->
-
-            searchResults.innerHTML = filteredLocations
-                .map(loc => `
-                    <div class="search-result-item" onclick="centerOnLocation('${loc.name}')">
-                        <i class="fas fa-map-marker-alt result-icon"></i>
-                        ${loc.name}
-                    </div>
-                `)
-                .join('');
-            }
-
-            resultsContainer.style.display = 'block';
-            }
-
-            function centerOnLocation(locationName) {
-            const location = locations.find(loc => loc.name === locationName);
-            if (location) {
-            // Close all existing popups first
-            Object.values(markersMap).forEach(marker => marker.closePopup());
-
-            // Center map and show popup
-            map.setView([location.lat, location.lon], 19);
-            const marker = markersMap[locationName];
+    if (filteredLocations.length === 0) {
+        searchResults.innerHTML = '<div class="search-result-item"><i class="fas fa-times-circle result-icon"></i>No results found</div>';
+    } else {
+        if (filteredLocations.length > 0) {
+            const firstMatch = filteredLocations[0];
+            const marker = markersMap[firstMatch.name];
             if (marker) {
                 marker.openPopup();
             }
-            }
-            document.querySelector('.search-results').style.display = 'none';
-            document.querySelector('.search-box').value = locationName;
+        }
 
-            // Remove focus from search box to hide mobile keyboard
-            document.querySelector('.search-box').blur();
-            }
+        searchResults.innerHTML = filteredLocations
+            .map(loc => `
+                <div class="search-result-item" onclick="centerOnLocation('${loc.name}')">
+                    <i class="fas fa-map-marker-alt result-icon"></i>
+                    ${loc.name}
+                </div>
+            `)
+            .join('');
+    }
 
-            // User location tracking variables and functions
-            let userMarkers = [];
-            let watchId = null;
+    resultsContainer.style.display = 'block';
+}
 
-            // Create location dot on map
-            function createLocationDot(lat, lon) {
-            userMarkers.forEach(marker => map.removeLayer(marker));
-            userMarkers = [];
+function centerOnLocation(locationName) {
+    const location = locations.find(loc => loc.name === locationName);
+    if (location) {
+        // Close all existing popups first
+        Object.values(markersMap).forEach(marker => marker.closePopup());
 
-            const mainDot = L.circle([lat, lon], {
-            color: '#4285f4',
-            fillColor: '#4285f4',
-            fillOpacity: 0.9,
-            radius: 3,
-            weight: 0
-            });
+        // Center map and show popup
+        map.setView([location.lat, location.lon], 19);
+        const marker = markersMap[locationName];
+        if (marker) {
+            marker.openPopup();
+        }
+    }
+    document.querySelector('.search-results').style.display = 'none';
+    document.querySelector('.search-box').value = locationName;
 
-            const outerGlow = L.circle([lat, lon], {
-            color: '#4285f4',
-            fillColor: '#4285f4',
-            fillOpacity: 0.15,
-            radius: 8,
-            weight: 0
-            });
+    // Remove focus from search box to hide mobile keyboard
+    document.querySelector('.search-box').blur();
+}
 
-            mainDot.addTo(map);
-            outerGlow.addTo(map);
-            userMarkers.push(mainDot, outerGlow);
-            }
+// User location tracking variables and functions
+let userMarkers = [];
+let userArrow = null;
+let watchId = null;
+let prevPosition = null;
+let currentHeading = 0; // Default heading (North)
 
-            // Toggle location tracking
-            function toggleTracking() {
-            const trackButton = document.getElementById('trackButton');
-            const statusElement = document.getElementById('status');
+// Create location dot and direction arrow on map
+function createLocationDot(lat, lon, heading = null) {
+    // Clear previous markers
+    userMarkers.forEach(marker => map.removeLayer(marker));
+    if (userArrow) map.removeLayer(userArrow);
+    userMarkers = [];
+    
+    // Update heading if provided
+    if (heading !== null) {
+        currentHeading = heading;
+    }
+    
+    // Main location dot
+    const mainDot = L.circle([lat, lon], {
+        color: '#4285f4',
+        fillColor: '#4285f4',
+        fillOpacity: 0.9,
+        radius: 3,
+        weight: 0
+    });
 
-            if (navigator.geolocation) {
-            if (watchId === null) {
-                trackButton.classList.add('active');
-                statusElement.style.display = 'block';
-                
-                watchId = navigator.geolocation.watchPosition(
-                    function(position) {
-                        const { latitude, longitude, accuracy } = position.coords;
-                        statusElement.innerHTML = `Accuracy: ±${Math.round(accuracy)}m`;
-                        createLocationDot(latitude, longitude);
-                        map.setView([latitude, longitude], 19);
-                    },
-                    function(error) {
-                        statusElement.innerHTML = `Error: ${error.message}`;
-                        trackButton.classList.remove('active');
-                        statusElement.style.display = 'none';
-                        watchId = null;
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-                trackButton.classList.remove('active');
-                statusElement.style.display = 'none';
-            }
-            } else {
-            statusElement.innerHTML = 'Geolocation is not supported by this browser.';
+    // Outer glow
+    const outerGlow = L.circle([lat, lon], {
+        color: '#4285f4',
+        fillColor: '#4285f4',
+        fillOpacity: 0.15,
+        radius: 8,
+        weight: 0
+    });
+    
+    // Direction arrow - create as SVG icon
+    const arrowIcon = L.divIcon({
+        html: `<div style="
+            width: 20px;
+            height: 20px;
+            position: relative;
+            top: -10px;
+            left: -10px;
+            transform: rotate(${currentHeading}deg);
+            transition: transform 0.3s ease-in-out;
+        ">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z" fill="#4285f4"/>
+            </svg>
+        </div>`,
+        className: 'direction-arrow',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    
+    userArrow = L.marker([lat, lon], { 
+        icon: arrowIcon,
+        zIndexOffset: 1000
+    }).addTo(map);
+    
+    mainDot.addTo(map);
+    outerGlow.addTo(map);
+    userMarkers.push(mainDot, outerGlow);
+}
+
+// Calculate heading based on previous and current positions
+function calculateHeading(prevPos, currentPos) {
+    if (!prevPos) return 0;
+    
+    const dy = currentPos.coords.latitude - prevPos.coords.latitude;
+    const dx = Math.cos(Math.PI/180 * prevPos.coords.latitude) * 
+              (currentPos.coords.longitude - prevPos.coords.longitude);
+    
+    // Calculate angle in degrees, convert to clockwise from North
+    let angle = Math.atan2(dx, dy) * 180 / Math.PI;
+    
+    return angle;
+}
+
+// Toggle location tracking with direction
+function toggleTracking() {
+    const trackButton = document.getElementById('trackButton');
+    const statusElement = document.getElementById('status');
+
+    if (navigator.geolocation) {
+        if (watchId === null) {
+            trackButton.classList.add('active');
             statusElement.style.display = 'block';
-            setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 3000);
+            prevPosition = null;
+            
+            watchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    statusElement.innerHTML = `Accuracy: ±${Math.round(accuracy)}m`;
+                    
+                    // Calculate heading if we have previous position
+                    let heading = null;
+                    if (prevPosition) {
+                        heading = calculateHeading(prevPosition, position);
+                    }
+                    
+                    createLocationDot(latitude, longitude, heading);
+                    map.setView([latitude, longitude], 19);
+                    
+                    // Store current position for next calculation
+                    prevPosition = position;
+                },
+                function(error) {
+                    statusElement.innerHTML = `Error: ${error.message}`;
+                    trackButton.classList.remove('active');
+                    statusElement.style.display = 'none';
+                    watchId = null;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            trackButton.classList.remove('active');
+            statusElement.style.display = 'none';
+            
+            // Remove direction arrow
+            if (userArrow) {
+                map.removeLayer(userArrow);
+                userArrow = null;
             }
-            }
+        }
+    } else {
+        statusElement.innerHTML = 'Geolocation is not supported by this browser.';
+        statusElement.style.display = 'block';
+        setTimeout(() => {
+            statusElement.style.display = 'none';
+        }, 3000);
+    }
+}
 
-            // Close search results when clicking outside
-            document.addEventListener('click', function(e) {
-            if (!e.target.closest('.search-container')) {
-            document.querySelector('.search-results').style.display = 'none';
-            }
-            });
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-container')) {
+        document.querySelector('.search-results').style.display = 'none';
+    }
+});
             </script>
 </body>
 </html>
